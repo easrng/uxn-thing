@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-clang-format main.c -i
+clang-format *.c -i
 clang -I. -I"$HOME/chibicc" -P -E main.c -o tmp.c
 chibicc -O1 tmp.c > tmp.tal
 echo '@end' >>tmp.tal

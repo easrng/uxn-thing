@@ -1,14 +1,5 @@
 #include <font.h>
 #include <varvara.h>
-void str_copy(char *src, char *dest, int dest_size) {
-  int i;
-  for (i = 0; i < (dest_size - 1); i++) {
-    if (src[i] == 0)
-      break;
-    dest[i] = src[i];
-  }
-  dest[i] = 0;
-}
 char *screen_buffer;
 int screen_size;
 char *input_buffer;
@@ -23,27 +14,29 @@ int cursor_y = 0;
   (screen_buffer[(((y) + screen_rotate) % screen_h) * screen_w + (x)])
 #define SET_SCREEN_BUFFER(x, y, val)                                           \
   (screen_buffer[(((y) + screen_rotate) % screen_h) * screen_w + (x)] = (val))
-void move_cursor_right() {
+void move_cursor_down(void);
+void move_cursor_right(void) {
   cursor_x++;
   if (cursor_x >= screen_w) {
     move_cursor_down();
     cursor_x = 0;
   }
 }
-void move_cursor_left() {
+void move_cursor_up(void);
+void move_cursor_left(void) {
   cursor_x--;
   if (cursor_x < 0) {
     cursor_x = screen_w - 1;
     move_cursor_up();
   }
 }
-void move_cursor_up() {
+void move_cursor_up(void) {
   cursor_y--;
   if (cursor_y < 0) {
     cursor_y = 0;
   }
 }
-void move_cursor_down() {
+void move_cursor_down(void) {
   cursor_y++;
   if (cursor_y >= screen_h) {
     screen_rotate++;
@@ -76,20 +69,15 @@ void putchar_g(char c) {
     move_cursor_right();
   }
 }
-char key_to_char(char c) {
-  if (c == '\r')
-    c = '\n';
-  return c;
-}
 void on_controller(void) {
-  char c = key_to_char(controller_key());
+  char c = controller_key();
   if (c) {
-    if (c == '\n') {
+    if (c == '\r') {
       for (int i = 0; i < input_len; i++)
         putchar(input_buffer[i]);
       putchar('\n');
+      putchar_g('\n');
       input_len = 0;
-      putchar_g(c);
     } else if (c == '\b') {
       if (input_len) {
         input_len--;
