@@ -8,8 +8,8 @@ unsigned int input_len = 0;
 unsigned int screen_w;
 unsigned int screen_h;
 unsigned int screen_rotate = 0;
-unsigned int cursor_x = 0;
-unsigned int cursor_y = 0;
+int cursor_x = 0;
+int cursor_y = 0;
 #define GET_SCREEN_BUFFER(x, y)                                                \
   (screen_buffer[(((y) + screen_rotate) % screen_h) * screen_w + (x)])
 #define SET_SCREEN_BUFFER(x, y, val)                                           \
@@ -49,7 +49,7 @@ void render() {
   for (unsigned int y = 0; y < screen_h; y++) {
     for (unsigned int x = 0; x < screen_w; x++) {
       unsigned char val = GET_SCREEN_BUFFER(x, y);
-      set_screen_xy(x << 3, y << 3);
+      set_screen_xy(x + 1 << 3, y + 1 << 3);
       set_screen_addr(font[val]);
       draw_sprite(x == cursor_x && y == cursor_y ? 0x54 : 0x51);
     }
@@ -106,9 +106,9 @@ void on_screen(void) {
   }
 }
 void main(void) {
-  set_palette(0x0f0f, 0x0ff0, 0x0fff);
-  screen_w = screen_width() >> 3;
-  screen_h = screen_height() >> 3;
+  set_palette(0x3c0f, 0x2b0f, 0x7f0f);
+  screen_w = (screen_width() >> 3) - 2;
+  screen_h = (screen_height() >> 3) - 2;
   screen_size = screen_w * screen_h;
   screen_buffer = asm(";end");
   input_size = 512;
