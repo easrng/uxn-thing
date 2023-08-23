@@ -1,15 +1,15 @@
 #include <font.h>
 #include <varvara.h>
-char *screen_buffer;
-int screen_size;
-char *input_buffer;
-int input_size;
-int input_len = 0;
-int screen_w;
-int screen_h;
-int screen_rotate = 0;
-int cursor_x = 0;
-int cursor_y = 0;
+unsigned char *screen_buffer;
+unsigned int screen_size;
+unsigned char *input_buffer;
+unsigned int input_size;
+unsigned int input_len = 0;
+unsigned int screen_w;
+unsigned int screen_h;
+unsigned int screen_rotate = 0;
+unsigned int cursor_x = 0;
+unsigned int cursor_y = 0;
 #define GET_SCREEN_BUFFER(x, y)                                                \
   (screen_buffer[(((y) + screen_rotate) % screen_h) * screen_w + (x)])
 #define SET_SCREEN_BUFFER(x, y, val)                                           \
@@ -41,21 +41,21 @@ void move_cursor_down(void) {
   if (cursor_y >= screen_h) {
     screen_rotate++;
     cursor_y = screen_h - 1;
-    for (int i = 0; i < screen_w; i++)
+    for (unsigned int i = 0; i < screen_w; i++)
       SET_SCREEN_BUFFER(i, screen_h - 1, 0);
   }
 }
 void render() {
-  for (int y = 0; y < screen_h; y++) {
-    for (int x = 0; x < screen_w; x++) {
-      char val = GET_SCREEN_BUFFER(x, y);
+  for (unsigned int y = 0; y < screen_h; y++) {
+    for (unsigned int x = 0; x < screen_w; x++) {
+      unsigned char val = GET_SCREEN_BUFFER(x, y);
       set_screen_xy(x << 3, y << 3);
       set_screen_addr(font[val]);
       draw_sprite(x == cursor_x && y == cursor_y ? 0x54 : 0x51);
     }
   }
 }
-void putchar_g(char c) {
+void putchar_g(unsigned char c) {
   if (c == '\r') {
     cursor_x = 0;
   } else if (c == '\n') {
@@ -70,10 +70,10 @@ void putchar_g(char c) {
   }
 }
 void on_controller(void) {
-  char c = controller_key();
+  unsigned char c = controller_key();
   if (c) {
     if (c == '\r') {
-      for (int i = 0; i < input_len; i++)
+      for (unsigned int i = 0; i < input_len; i++)
         putchar(input_buffer[i]);
       putchar('\n');
       putchar_g('\n');
@@ -94,7 +94,7 @@ void on_controller(void) {
     render();
   }
 }
-char render_soon = 0;
+unsigned char render_soon = 0;
 void on_console(void) {
   putchar_g(console_read());
   render_soon = 1;
