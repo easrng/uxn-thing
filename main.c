@@ -69,14 +69,18 @@ void putchar_g(unsigned char c) {
     move_cursor_right();
   }
 }
+void putstr_g(unsigned char *str, unsigned int str_len) {
+  for (unsigned int i = 0; i < str_len; i++)
+    putchar_g(str[i]);
+}
+void on_line(unsigned char *line, unsigned int line_len);
 void on_controller(void) {
   unsigned char c = controller_key();
   if (c) {
     if (c == '\r') {
-      for (unsigned int i = 0; i < input_len; i++)
-        putchar(input_buffer[i]);
-      putchar('\n');
       putchar_g('\n');
+      render();
+      on_line(input_buffer, input_len);
       input_len = 0;
     } else if (c == '\b') {
       if (input_len) {
@@ -85,26 +89,25 @@ void on_controller(void) {
           move_cursor_left();
           SET_SCREEN_BUFFER(cursor_x, cursor_y, 0);
         } while (cursor_x && !GET_SCREEN_BUFFER(cursor_x - 1, cursor_y));
+        render();
       }
     } else if (input_len < input_size) {
       input_buffer[input_len] = c;
       input_len++;
       putchar_g(c);
+      render();
     }
-    render();
   }
 }
-unsigned char render_soon = 0;
-void on_console(void) {
-  putchar_g(console_read());
-  render_soon = 1;
+void prompt(void) { putstr_g("> ", 2); }
+void puthex_g(unsigned int word) {
+  char hex[16] = "0123456789abcdef";
+  putchar_g(hex[word >> 12 & 0xf]);
+  putchar_g(hex[word >> 8 & 0xf]);
+  putchar_g(hex[word >> 4 & 0xf]);
+  putchar_g(hex[word & 0xf]);
 }
-void on_screen(void) {
-  if (render_soon) {
-    render_soon = 0;
-    render();
-  }
-}
+#include <setjmp.h>
 void main(void) {
   set_palette(0x3c0f, 0x2b0f, 0x7f0f);
   screen_w = (screen_width() >> 3) - 2;
@@ -113,5 +116,12 @@ void main(void) {
   screen_buffer = asm(";end");
   input_size = 512;
   input_buffer = screen_buffer + screen_size;
+  prompt();
+  render();
+}
+void on_line(unsigned char *line, unsigned int line_len) {
+  putstr_g(line, line_len);
+  putchar_g('\n');
+  prompt();
   render();
 }
