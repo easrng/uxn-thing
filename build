@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 clang-format *.c *.h -i
-clang -nostdinc -I. -I./lua-5.4.6/src -I"$HOME/chibicc" -P -E main.c -o tmp.c
+clang -nostdinc -I. -I"$HOME/chibicc" -P -E main.c -o tmp.c
 chibicc -O1 tmp.c > tmp.tal
 echo '@end' >>tmp.tal
 rm tmp.c
